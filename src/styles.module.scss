@@ -1,5 +1,25 @@
+.gridForm {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-size), var(--grid-width));
-  grid-auto-flow: column;
+  grid-auto-rows: var(--grid-height);
+  width: calc(var(--grid-size) * var(--grid-width));
+  margin: 3rem auto;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .add {
+    align-self: stretch;
+    justify-self: stretch;
+    padding-top: 3rem;
+    text-align: center;
+    background-color: #EEE;
+  }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SwatchState } from "./Swatch";
+import { SwatchState, SwatchPosition } from "./Swatch";
 
 export interface SwatchesState {
   swatches: SwatchState[];
@@ -22,21 +22,26 @@ const ADD = 'ADD';
 const DELETE = 'DELETE';
 const SET_COLOR = 'SET_COLOR';
 const SET_GRID = 'SET_GRID';
+const RESET = 'RESET';
 
 export const reducer = (state: SwatchesState, action: Action): SwatchesState => {
+  const {
+    gridWidth,
+    swatches
+  } = state;
   switch (action.type) {
     case ADD: {
       return {
-        ...state,
-        swatches: [...state.swatches, {color: ''}]
+        gridWidth,
+        swatches: positionSwatches(gridWidth, [...swatches, {color: ''}])
       };
     }
     case DELETE: {
-      const swatches = [...state.swatches];
-      swatches.splice(action.payload, 1);
+      const newSwatches = [...state.swatches];
+      newSwatches.splice(action.payload, 1);
       return {
-        ...state,
-        swatches
+        gridWidth,
+        swatches: positionSwatches(gridWidth, newSwatches)
       };
     }
     case SET_COLOR: {
@@ -45,19 +50,40 @@ export const reducer = (state: SwatchesState, action: Action): SwatchesState => 
         index
       } = action.payload;
       return {
-        ...state,
-        swatches: state.swatches.map((swatch, i) => i === index ? {...swatch, color} : swatch)
+        gridWidth,
+        swatches: swatches.map((swatch, i) => i === index ? {...swatch, color} : swatch)
       };
     }
     case SET_GRID: {
       return {
-        ...state,
-        gridWidth: action.payload
+        gridWidth: action.payload,
+        swatches: positionSwatches(action.payload, swatches)
+      };
+    }
+    case RESET: {
+      return {
+        gridWidth,
+        swatches: []
       };
     }
     default:
       return state;
   }
+};
+
+const positionSwatches = (gridWidth: number, swatches: SwatchState[]): SwatchState[] => {
+  const leftOrRight: SwatchPosition[] = ['left', 'right'];
+  const topOrBottom: SwatchPosition[] = ['top', 'bottom'];
+
+  if (gridWidth === 1) {
+    return swatches.map(({color}) => ({color, position: 'right'}));
+  }
+
+  if (gridWidth === 2 ) {
+    return swatches.map(({color}, i) => ({color, position: leftOrRight[i % 2]}));
+  }
+
+  return swatches.map(({color}, i) => ({color, position: topOrBottom[~~(i / gridWidth) % 2]}));
 };
 
 export const setColor = (index: number, color: string) => ({
@@ -79,3 +105,5 @@ export const setGrid = (size: number) => ({
   type: SET_GRID,
   payload: size
 });
+
+export const reset = () => ({ type: RESET });
