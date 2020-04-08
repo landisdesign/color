@@ -1,24 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useReducer } from 'react';
+import { reducer, initialState, addSwatch } from './reducer';
+import Swatch from './Swatch';
+
+import styles from './styles.module.scss';
 
 function App() {
+  
+  const [swatchState, swatchDispatch] = useReducer(reducer, initialState);
+
+  const gridSize = {
+    '--grid-size': swatchState.gridWidth,
+    '--grid-width': swatchState.gridWidth === 2 ? '8rem' : '6rem'
+  } as React.CSSProperties;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={gridSize} className={styles.grid}>
+      {
+        swatchState.swatches.map(
+          (swatch, i) => (
+            <Swatch
+              key={`${swatch.color}-${i}`}
+              index={i}
+              state={swatch}
+              dispatch={swatchDispatch}
+            />)
+        )
+      }
+      <div>
+        <button type='button' onClick={() => swatchDispatch(addSwatch())}>Add Swatch</button>
+      </div>
     </div>
   );
 }
